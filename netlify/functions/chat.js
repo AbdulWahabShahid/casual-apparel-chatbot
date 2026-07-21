@@ -11,7 +11,7 @@ exports.handler = async function(event) {
     };
   }
 
-  const API_KEY = "const API_KEY = process.env.ANTHROPIC_API_KEY;";
+  const API_KEY = process.env.ANTHROPIC_API_KEY;
 
   try {
     const body = JSON.parse(event.body);
