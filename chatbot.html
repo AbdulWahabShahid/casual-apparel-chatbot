@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>The Casual Apparel - Chat Support</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .chat-container { width: 400px; height: 600px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; }
+    .chat-header { background-color: #222222; color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 40px; height: 40px; background-color: #ffffff30; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .header-info h3 { font-size: 16px; font-weight: 600; }
+    .header-info p { font-size: 12px; color: #aaaaaa; }
+    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .message { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+    .message.jane { background-color: #f0f0f0; color: #222222; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .message.user { background-color: #222222; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-input-area { padding: 16px; border-top: 1px solid #eeeeee; display: flex; gap: 10px; }
+    .chat-input-area input { flex: 1; padding: 10px 14px; border: 1px solid #dddddd; border-radius: 24px; font-size: 14px; outline: none; }
+    .chat-input-area input:focus { border-color: #222222; }
+    .chat-input-area button { background-color: #222222; color: white; border: none; padding: 10px 18px; border-radius: 24px; font-size: 14px; cursor: pointer; }
+    .chat-input-area button:hover { background-color: #444444; }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="avatar">👩</div>
+      <div class="header-info">
+        <h3>Jane</h3>
+        <p>The Casual Apparel · Customer Support</p>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="message jane">Hi there! 👋 Welcome to The Casual Apparel! I'm Jane, your customer support assistant. How can I help you today?</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="userInput" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+<script>
+const SYSTEM_PROMPT = `You are Jane, a friendly and professional customer service assistant for The Casual Apparel — an online clothing store that sells printed T-shirts, hoodies, tops, embroidered hats and beanies.
+
+Your job is to help customers with their questions and concerns in a warm, polite and professional tone. You are not too formal and not too casual — think of yourself as a helpful and knowledgeable shopkeeper who genuinely cares about customers.
+
+RETURN POLICY:
+- Customers can return items within 30 days of receiving them
+- Items must be unused and in original condition
+
+WRONG ITEM RECEIVED:
+- Apologize sincerely
+- Tell them we will send the correct replacement immediately
+- Let them know they can keep the wrong item
+
+CANCELLED ORDER BUT STILL CHARGED:
+- Reassure the customer
+- Explain it may be an authorization hold, not a real charge
+- Authorization holds disappear within 3-5 business days
+- If it is a real charge, a full refund will be processed in 3-5 business days
+
+ORDER TRACKING:
+- Ask for their order number
+- Let them know a tracking email was sent
+- Direct further help to support@thecasualapparel.com
+
+GENERAL RULES:
+- Always greet warmly
+- Never make up information
+- If unsure, direct to support@thecasualapparel.com
+- Never be rude even if customer is angry
+- Keep responses clear and concise`;
+
+let conversationHistory = [];
+
+async function sendMessage() {
+  const input = document.getElementById("userInput");
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage(message, "user");
+  input.value = "";
+
+  conversationHistory.push({ role: "user", content: message });
+  addMessage("Jane is typing...", "jane typing");
+
+  try {
+    const response = await fetch("/.netlify/functions/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1024,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.content && data.content[0]) {
+      const reply = data.content[0].text;
+      removeTypingIndicator();
+      addMessage(reply, "jane");
+      conversationHistory.push({ role: "assistant", content: reply });
+    } else {
+      removeTypingIndicator();
+      addMessage("Sorry, something went wrong. Please try again!", "jane");
+    }
+
+  } catch (error) {
+    removeTypingIndicator();
+    addMessage("Sorry, something went wrong. Please try again!", "jane");
+  }
+}
+
+function addMessage(text, type) {
+  const messagesDiv = document.getElementById("chatMessages");
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `message ${type}`;
+  messageDiv.textContent = text;
+  messagesDiv.appendChild(messageDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const typing = document.querySelector(".typing");
+  if (typing) typing.remove();
+}
+
+document.getElementById("userInput").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") sendMessage();
+});
+</script>
+</body>
+</html>
