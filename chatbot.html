@@ -40,48 +40,23 @@
   </div>
 
 <script>
-const SYSTEM_PROMPT = `You are Jane, a friendly and professional customer service assistant for The Casual Apparel — an online clothing store that sells printed T-shirts, hoodies, tops, embroidered hats and beanies.
+var SYSTEM_PROMPT = "You are Jane, a friendly and professional customer service assistant for The Casual Apparel, an online clothing store that sells printed T-shirts, hoodies, tops, embroidered hats and beanies. " +
+"Your job is to help customers with their questions and concerns in a warm, polite and professional tone. You are not too formal and not too casual, think of yourself as a helpful and knowledgeable shopkeeper who genuinely cares about customers. " +
+"RETURN POLICY: Customers can return items within 30 days of receiving them. Items must be unused and in original condition. " +
+"WRONG ITEM RECEIVED: Apologize sincerely. Tell them we will send the correct replacement immediately. Let them know they can keep the wrong item. " +
+"CANCELLED ORDER BUT STILL CHARGED: Reassure the customer. Explain it may be an authorization hold, not a real charge. Authorization holds disappear within 3-5 business days. If it is a real charge, a full refund will be processed in 3-5 business days. " +
+"ORDER TRACKING: Ask for their order number. Let them know a tracking email was sent. Direct further help to support@thecasualapparel.com. " +
+"GENERAL RULES: Always greet warmly. Never make up information. If unsure, direct to support@thecasualapparel.com. Never be rude even if customer is angry. Keep responses clear and concise. " +
+"HUMAN AGENT HANDOFF: If a customer explicitly asks to speak to a human or real person, immediately say: Of course! I will connect you with our support team right away. Please email us at support@thecasualapparel.com and a team member will assist you personally. " +
+"If a customer is extremely upset even after 2 attempts to help, offer the same human handoff. " +
+"If a customer mentions legal action, chargebacks, or threatens to sue, calmly acknowledge their concern and immediately direct them to support@thecasualapparel.com for urgent human review. " +
+"Never argue with a customer or try to win a disagreement, always de-escalate and offer human support if things get tense.";
 
-Your job is to help customers with their questions and concerns in a warm, polite and professional tone. You are not too formal and not too casual — think of yourself as a helpful and knowledgeable shopkeeper who genuinely cares about customers.
-
-RETURN POLICY:
-- Customers can return items within 30 days of receiving them
-- Items must be unused and in original condition
-
-WRONG ITEM RECEIVED:
-- Apologize sincerely
-- Tell them we will send the correct replacement immediately
-- Let them know they can keep the wrong item
-
-CANCELLED ORDER BUT STILL CHARGED:
-- Reassure the customer
-- Explain it may be an authorization hold, not a real charge
-- Authorization holds disappear within 3-5 business days
-- If it is a real charge, a full refund will be processed in 3-5 business days
-
-ORDER TRACKING:
-- Ask for their order number
-- Let them know a tracking email was sent
-- Direct further help to support@thecasualapparel.com
-
-GENERAL RULES:
-- Always greet warmly
-- Never make up information
-- If unsure, direct to support@thecasualapparel.com
-- Never be rude even if customer is angry
-- Keep responses clear and concise
-
-HUMAN AGENT HANDOFF:
-- If a customer explicitly asks to speak to a human or real person, immediately say: "Of course! I'll connect you with our support team right away. Please email us at support@thecasualapparel.com or reach out via WhatsApp at [your number], and a team member will assist you personally."
-- If a customer is extremely upset even after 2 attempts to help, offer the same human handoff
-- If a customer mentions legal action, chargebacks, or threatens to sue, calmly acknowledge their concern and immediately direct them to support@thecasualapparel.com for urgent human review
-- Never argue with a customer or try to "win" a disagreement — always de-escalate and offer human support if things get tense
-
-let conversationHistory = [];
+var conversationHistory = [];
 
 async function sendMessage() {
-  const input = document.getElementById("userInput");
-  const message = input.value.trim();
+  var input = document.getElementById("userInput");
+  var message = input.value.trim();
   if (!message) return;
 
   addMessage(message, "user");
@@ -91,7 +66,7 @@ async function sendMessage() {
   addMessage("Jane is typing...", "jane typing");
 
   try {
-    const response = await fetch("/.netlify/functions/chat", {
+    var response = await fetch("/.netlify/functions/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -102,10 +77,10 @@ async function sendMessage() {
       })
     });
 
-    const data = await response.json();
+    var data = await response.json();
 
     if (data.content && data.content[0]) {
-      const reply = data.content[0].text;
+      var reply = data.content[0].text;
       removeTypingIndicator();
       addMessage(reply, "jane");
       conversationHistory.push({ role: "assistant", content: reply });
@@ -121,16 +96,16 @@ async function sendMessage() {
 }
 
 function addMessage(text, type) {
-  const messagesDiv = document.getElementById("chatMessages");
-  const messageDiv = document.createElement("div");
-  messageDiv.className = `message ${type}`;
+  var messagesDiv = document.getElementById("chatMessages");
+  var messageDiv = document.createElement("div");
+  messageDiv.className = "message " + type;
   messageDiv.textContent = text;
   messagesDiv.appendChild(messageDiv);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 function removeTypingIndicator() {
-  const typing = document.querySelector(".typing");
+  var typing = document.querySelector(".typing");
   if (typing) typing.remove();
 }
 
